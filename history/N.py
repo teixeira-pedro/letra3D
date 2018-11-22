@@ -1,9 +1,11 @@
 import pygame
 from pygame.locals import *
 import numpy
+from math import sqrt
 import copy
 
-# Configurações
+
+# Configuracoes
 color = (123, 49, 125)
 width = 6 # espessura da linha desenhada
 scale = 4
@@ -13,10 +15,10 @@ SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 640
 
 
-# Definição da estrutura de dados
+# Definicao da estrutura de dados
 
-# Como um jogo de ligue-os-pontos, o Z começará no 0 e se conectará a seu sucessor, 
-# até que chegue em 9, quando ele finalmente se conecta ao 0.
+# Como um jogo de ligue-os-pontos, o Z comecara no 0 e se conectara a seu sucessor, 
+# ate que chegue em 9, quando ele finalmente se conecta ao 0.
 #   0   1       3   4
 #
 #       7
@@ -27,11 +29,11 @@ SCREEN_HEIGHT = 640
 #
 #   9   8       6   5
 
-# O formato é da letra N porque comecei a fazer com a letra N, mas como a forma é igual, não faz diferença.
-# Fui instruído apenas a rotacionar em noventa graus.
+# O formato e da letra N porque comecei a fazer com a letra N, mas como a forma e igual, nao faz diferenca.
+# Fui instruido apenas a rotacionar em noventa graus.
 
-# Para calcular a normal de uma face, considero que os pontos de uma face visível 
-# são descritos na estrutura de dados em sentido horário.
+# Para calcular a normal de uma face, considero que os pontos de uma face visivel 
+# sao descritos na estrutura de dados em sentido horario.
 
 
 # Escolha das coordenadas da imagem
@@ -61,7 +63,8 @@ rotation_velocity = [0, 0, 0.89]
 Z_in_world_coordinates = copy.deepcopy(N)
 
 
-# Definindo funções
+# Definindo funcoes
+
 
 def scaling_matrix (scale):
     return [[scale, 0, 0, 0], [0, scale, 0, 0], [0, 0, scale, 0], [0, 0, 0, 1]]
@@ -83,7 +86,7 @@ def rotation_matrix_around_z (degrees):
 
 def invert_normal (face):
     inverted = copy.deepcopy(face)
-    for i in inverted.
+    #for i in inverted
         
 
 def draw2DLine (screen, a, b, color, width):
@@ -91,7 +94,7 @@ def draw2DLine (screen, a, b, color, width):
 
 def pointSRUtoScreen (point):
     new = point.copy()
-    # Decidi usar a maior dimensão para evitar deformações indesejadas
+    # Decidi usar a maior dimensao para evitar deformacoes indesejadas
     new[0] = new[0] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
     new[1] = SCREEN_HEIGHT - new[1] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
     return new
@@ -112,7 +115,7 @@ running = True
 
 while running:
 	
-    # A matriz original do objeto fica à esquerda
+    # A matriz original do objeto fica a esquerda
     transform_matrix = numpy.matmul(rotation_matrix_around_z(rotation[2]), translation_matrix(position[0], position[1], position[2]))
     transform_matrix = numpy.matmul(transform_matrix, scaling_matrix(scale))
 
@@ -141,7 +144,7 @@ while running:
     pygame.time.wait(50)
     pygame.display.flip()
 
-    # Se for na posição inicial, esperar um pouco antes de começar o movimento
+    # Se for na posicao inicial, esperar um pouco antes de comecar o movimento
     if (position == initial_position):
         pygame.time.wait(5000)
 

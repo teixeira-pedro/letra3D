@@ -12,7 +12,7 @@ from pygame.locals import*
 #print(pygame.display.Info())
 #-------------------------------------------------------------------
 #---------------------OPERACOES MATEMATICAS-------------------------
-#Operações matematicas sobre pontos e arestas
+#Operaooes matematicas sobre pontos e arestas
 
 def mu_mat(A,B):
     C=[]
@@ -24,7 +24,7 @@ def mu_mat(A,B):
             result=0
             for k in range(len(B)):
                 result+=(A[i][k]*B[k][j])
-            j.append(result)
+            linha.append(result)
         C.append(linha)
     return C
 def imp_mat(A):
@@ -67,7 +67,7 @@ class SRU:
     def get_F(self):
         return self._F
 
-    def print(self):
+    def printt(self):
         print(self.to_string())
     
     def to_string(self):
@@ -83,9 +83,9 @@ class SRU:
 
     
 #Definindo Aresta
-#   a classe irá possuir como atributos,
-#   sua métrica, matemáticamente definida e ,
-#   sua implementação ou instanciamento utilizando a biblioteca gráfica de python
+#   a classe ira possuir como atributos,
+#   sua metrica, matematicamente definida e ,
+#   sua implementaoco ou instanciamento utilizando a biblioteca grafica de python
 
 class Aresta:
     def __init__(self,p_i,p_f,g):
@@ -95,7 +95,7 @@ class Aresta:
         self.gros=g
 
 
-    def print(self):
+    def printt(self):
         print(self.to_string())
     
     def to_string(self):
@@ -136,7 +136,7 @@ class Objeto2D :
         self.arestas=[]
         self.pontos=[]
 
-    def print(self):
+    def printt(self):
         print(self.to_string())
     
     def to_string(self):
@@ -383,7 +383,7 @@ class Objeto2D :
 
         
 #-------------------------------------------------------------------        
-#-----------------------FUNÇÕES AUXILIARES--------------------------
+#-----------------------FUNooES AUXILIARES--------------------------
 def arestas_iguais(A,B):
     if type(A)!=type(B):
         return 0
@@ -393,7 +393,7 @@ def arestas_iguais(A,B):
     return (((A.I_x()==B.I_x())and(A.I_y()==B.I_y()))and((A.F_x()==B.F_x())and(A.F_y()==B.F_y())) or
             ((A.I_x()==B.F_x())and(A.I_y()==B.F_y()))and((A.F_x()==B.I_x())and(A.F_y()==B.I_y())))####last
 #-------------------------------------------------------------------
-#-----------------------------EXECUÇÃO------------------------------
+#-----------------------------EXECUocO------------------------------
 
     
 resolucao=(500,500)
@@ -432,7 +432,7 @@ O_l.append_aresta(Aresta([55,0],[45,0],1))#EF
 
 
 arq=open('log_.txt','w')
-arq.write('resolucao da tela:'+str(resolucao)+' resolução do sistema:'+str(sys_resolution)+' cor do objeto [R,G,B]: '+str(cor)+"limites_py="+str(limits_py)+' SRU='+str(SR.get_I())+' '+str(SR.get_F())+'\n')
+arq.write('resolucao da tela:'+str(resolucao)+' resoluoco do sistema:'+str(sys_resolution)+' cor do objeto [R,G,B]: '+str(cor)+"limites_py="+str(limits_py)+' SRU='+str(SR.get_I())+' '+str(SR.get_F())+'\n')
 arq.write('**************\n<posicoes de cada aresta>\n<theta>\t<x>\t<y>**************\n')
 
         
