@@ -117,6 +117,16 @@ def pointSRUtoScreen (point):
     new[1] = SCREEN_HEIGHT - new[1] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
     return new
 
+def desenha_faces(O):
+    for face in O:
+        desenha_face(O)
+
+def desenha_face(N):
+    for i in range(-1, len(N)-1):
+        pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
+        pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
+        draw2DLine(screen, pointA, pointB, color, width)
+
 
 # Inicializando tela
 
@@ -149,10 +159,11 @@ while running:
 
 
     # Desenha Objeto
-    for i in range(-1, len(N)-1):
-        pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
-        pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
-        draw2DLine(screen, pointA, pointB, color, width)
+    desenha_face(N)
+    #for i in range(-1, len(N)-1):
+    #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
+    #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
+    #    draw2DLine(screen, pointA, pointB, color, width)
 
     # Desenha Borda
     draw2DLine(screen, [0, 0], [0, SCREEN_HEIGHT], Color("white"), 5)
