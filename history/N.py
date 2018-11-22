@@ -74,6 +74,17 @@ def scaling_matrix (scale):
 def translation_matrix (x, y, z):
     return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
 
+def oblique_parallel_projection_matrix (degrees, l = 1):
+    angle = deg2rad(degrees)
+    return [[1, 0, l * cos(degrees), 0], [0, 1, l * sin(degrees), 0], [0, 0, 0, 0], [0, 0, 0, 1]]
+
+def back_face_culling (object3D, observer_point):
+    new_object = []
+    for i in object3D:
+        face_normal = normal_vector(object3D[i])
+        if (dot(map(operator.sub, object3D[i], observer_point), face_normal) < 0):
+            new_object += object3D[i]
+    return new_object
 
 def rotation_matrix_around_z (degrees):
     degrees = numpy.deg2rad(degrees)
@@ -193,4 +204,3 @@ while running:
 
 
 pygame.time.wait(5000)
-
