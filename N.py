@@ -3,7 +3,6 @@ from pygame.locals import *
 import numpy
 from math import sqrt
 import copy
-import operator
 
 
 # Configuracoes
@@ -85,26 +84,10 @@ def rotation_matrix_around_z (degrees):
     return rotation_matrix
 
 
-def reversed_normal (face):
-    inverted_face = list(copy.deepcopy(face))
-    inverted_face.reverse()
-    return inverted_face
 
-def normal_vector (face):
-    nface = copy.deepcopy(face)
-    a = list(map(operator.sub, nface[0], nface[1])) # v1 - v2
-    a = a[0:3]
-    b = list(map(operator.sub, nface[0], nface[2])) # v1 - v3
-    b = b[0:3]
-    return list(numpy.cross(a, b))
-
-
-def copia_face_principal_para_plano_z(face,z):
-    copia=copy.deepcopy(face)
-    for i in range(len(copia)):
-        copia[i][2]=copia[i][2]+z
-    return copia
-
+def invert_normal (face):
+    inverted = copy.deepcopy(face)
+    #for i in inverted
         
 
 def draw2DLine (screen, a, b, color, width):
@@ -138,7 +121,6 @@ while running:
     transform_matrix = numpy.matmul(transform_matrix, scaling_matrix(scale))
 
     Z_in_world_coordinates = numpy.matmul(N, transform_matrix)
-
     #copy.deepcopy(N)
     for i in range(-1, len(N)-1):
         Z_in_world_coordinates[i][0] += position[0]
@@ -182,4 +164,3 @@ while running:
 
 
 pygame.time.wait(5000)
-
