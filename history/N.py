@@ -59,9 +59,8 @@ rotation = [0, 0, 90]
 
 # etc
 m = sqrt(2) # Menor aresta (calculada manualmente), usada como espessura
-velocity = [-0.5, 1.0, 0]
-rotation_velocity = [0, 0, 0.89]
-Z_in_world_coordinates = copy.deepcopy(N)
+velocity = [0.5, 2.0, 0]
+rotation_velocity = [0, 5, 1]
 
 
 # Definindo funcoes
@@ -75,16 +74,25 @@ def translation_matrix (x, y, z):
     return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
 
 def oblique_parallel_projection_matrix (degrees, l = 1):
-    angle = deg2rad(degrees)
-    return [[1, 0, l * cos(degrees), 0], [0, 1, l * sin(degrees), 0], [0, 0, 0, 0], [0, 0, 0, 1]]
+    angle = numpy.deg2rad(degrees)
+    return [[1, 0, l * numpy.cos(degrees), 0], [0, 1, l * numpy.sin(degrees), 0], [0, 0, 0, 0], [0, 0, 0, 1]]
 
 def back_face_culling (object3D, observer_point):
     new_object = []
     for i in object3D:
         face_normal = normal_vector(object3D[i])
-        if (dot(map(operator.sub, object3D[i], observer_point), face_normal) < 0):
+        if (numpy.dot(map(operator.sub, object3D[i], observer_point), face_normal) < 0):
             new_object += object3D[i]
     return new_object
+
+def rotation_matrix_around_y (degrees):
+    degrees = numpy.deg2rad(degrees)
+    rotation_matrix = []
+    rotation_matrix += [[1, 0, 0, 0]]
+    rotation_matrix += [[0, numpy.cos(degrees), -numpy.sin(degrees), 0]]
+    rotation_matrix += [[0, numpy.sin(degrees), numpy.cos(degrees), 0]]
+    rotation_matrix += [[0, 0, 0, 1]]
+    return rotation_matrix
 
 def rotation_matrix_around_z (degrees):
     degrees = numpy.deg2rad(degrees)
@@ -109,6 +117,17 @@ def normal_vector (face):
     b = b[0:3]
     return list(numpy.cross(a, b))
 
+def sweep_3D (object_2D, depth):
+    object_3D = [copy.deepcopy(object_2D)]
+    object_3D += [copia_face_principal_para_plano_z(object_2D, depth)] # será revertido no final
+    pts = len(object_2D)
+    for v in range(pts):
+        new_face = copy.deepcopy([object_3D[0][v], object_3D[0][(v + 1) % pts], object_3D[1][(v + 1) % pts], object_3D[1][v]])
+        object_3D += [new_face]
+    object_3D[1] = reversed_normal(object_3D[1])
+    return object_3D
+
+        
 
 def copia_face_principal_para_plano_z(face,z):
     copia=copy.deepcopy(face)
@@ -126,16 +145,16 @@ def pointSRUtoScreen (point):
     # Decidi usar a maior dimensao para evitar deformacoes indesejadas
     new[0] = new[0] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
     new[1] = SCREEN_HEIGHT - new[1] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
-    return new
+    return [new[0], new[1]]
 
 def desenha_faces(O):
     for face in O:
-        desenha_face(O)
+        desenha_face(face)
 
-def desenha_face(N):
-    for i in range(-1, len(N)-1):
-        pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
-        pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
+def desenha_face(face):
+    for i in range(-1, len(face)-1):
+        pointA = pointSRUtoScreen(face[i])
+        pointB = pointSRUtoScreen(face[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
 
 
@@ -153,24 +172,32 @@ screen.fill((0, 0, 0))
 running = True
 
 while running:
-	
     # A matriz original do objeto fica a esquerda
-    transform_matrix = numpy.matmul(rotation_matrix_around_z(rotation[2]), translation_matrix(position[0], position[1], position[2]))
-    transform_matrix = numpy.matmul(transform_matrix, scaling_matrix(scale))
+    transform_matrix = rotation_matrix_around_z(rotation[2])
+    transform_matrix = numpy.matmul(rotation_matrix_around_y(rotation[1]), transform_matrix)
 
-    Z_in_world_coordinates = numpy.matmul(N, transform_matrix)
+    transform_matrix = numpy.matmul(scaling_matrix(scale), transform_matrix)
+    transform_matrix = numpy.matmul(translation_matrix(position[0], position[1], position[2]), transform_matrix)
+    transform_matrix = numpy.matmul(oblique_parallel_projection_matrix(120), transform_matrix)
+
+    Z_in_world_coordinates = []
+    
+    for face in sweep_3D(N, m):
+        Z_in_world_coordinates += [numpy.matmul(face, numpy.transpose(transform_matrix)).tolist()]
+
+    
 
     #copy.deepcopy(N)
-    for i in range(-1, len(N)-1):
-        Z_in_world_coordinates[i][0] += position[0]
-        Z_in_world_coordinates[i][1] += position[1]
-        Z_in_world_coordinates[i][2] += position[2]
+    #for i in range(-1, len(N)-1):
+    #    Z_in_world_coordinates[i][0] += position[0]
+    #    Z_in_world_coordinates[i][1] += position[1]
+    #    Z_in_world_coordinates[i][2] += position[2]
 
-    print(Z_in_world_coordinates)
+    #print(Z_in_world_coordinates)
 
 
     # Desenha Objeto
-    desenha_face(N)
+    desenha_faces(Z_in_world_coordinates)
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
     #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
