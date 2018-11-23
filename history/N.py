@@ -169,6 +169,52 @@ def pinta_face(face, color):
     pygame.draw.polygon(screen, color, poligono2D)
 
 
+def dist_vet(v): #retorna tamanhao do vetor
+    d=0
+    for i in v:
+        d+=(i**2)
+    return sqrt(d)
+
+def VET(A,B): #retorna vetor AB
+    resp=[]
+    if len(A)!=len(B):
+        return []
+    for i in range(len(A)):
+        resp.append(B[i]-A[i])
+    return resp
+
+def dist_face(F,obser): #retorna o ponto mais proximo da face , juntamente com  a face
+    i=float("inf")
+    for P in F:
+        if dist_vet(VET(P,obser))<i:
+            i=dist_vet(VET(P,obser))
+    return [i,F]
+
+#def test_faces_ordenadas(O,obser): #
+#    k=[]
+ #   for F in O:
+#        k.append(dist_face(F,obser))
+   # k.sort(reverse=False,key=tama) # ordena em relacao a distancia de cada face em relacao ao O
+  #  return k
+
+def tama(m): #funcao auxiliar pra ordenacao
+    return m[0]
+
+def faces_ordenadas_por_menor_dist(O,obser): #pega o objeto, o ponto de observacao
+    #cria uma lista contendo [o ponto mais proximo da face, a proporia face] de cada face
+    #ordena a lista em relacao a distancia entre o ponto mais proximo da face e a observa
+    #limpa a lista, deixando so  as faces ordenadas e retorna
+    
+    resp=[]
+    k=[]
+    for F in O:
+        k.append(dist_face(F,obser))
+    k.sort(reverse=False,key=tama) # ordena em relacao a distancia de cada face em relacao ao O
+    for u in k: #retira as distancias
+        resp.append(u[1])
+    return resp
+
+
 # Inicializando tela
 
 pygame.init()
