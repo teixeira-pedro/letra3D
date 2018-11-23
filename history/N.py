@@ -158,16 +158,21 @@ def desenha_face(face):
         pointB = pointSRUtoScreen(face[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
 
-def pinta_faces(object_3D, color):
+def pinta_faces(object_3D, color, luz_ponto=None, luz_intensidade=0):
     for face in object_3D:
-        pinta_face(face, color)
+        pinta_face(face, color, luz_ponto, luz_intensidade)
 
-def pinta_face(face, color):
+def pinta_face(face, color, luz_ponto=None, luz_intensidade=0): # Luz pontual
+    if (luz_ponto != None and luz_intensidade > 0):
+        incidence_vector = list(map(operator.sub, face[0], luz_ponto))
+        radiance = luz_intensidade * numpy.cos(angle_between(normal_vector(face), incidence_vector))
+        #color = Color(round(color.r * radiance), round(color.g * radiance), round(color.b * radiance), color.a)
+        print(radiance)
+        color = color * radiance
     poligono2D = copy.deepcopy(face)
     for i in range(len(poligono2D)):
         poligono2D[i] = pointSRUtoScreen(poligono2D[i])
     pygame.draw.polygon(screen, color, poligono2D)
-
 
 def dist_vet(v): #retorna tamanhao do vetor
     d=0
@@ -213,6 +218,21 @@ def faces_ordenadas_por_menor_dist(O,obser): #pega o objeto, o ponto de observac
         resp.append(u[1])
     return resp
 
+def normalize_vector2(vector2):
+    v = copy.deepcopy(vector2)
+    magnitude = sqrt(v[0]**2 + v[1]**2)
+    return [v[0]/magnitude, v[1]/magnitude]
+
+def normalize_vector3(vector3):
+    v = copy.deepcopy(vector3)
+    magnitude = sqrt(v[0]**2 + v[1]**2 + v[2]**2)
+    return [v[0]/magnitude, v[1]/magnitude, v[2]/magnitude]
+
+def angle_between(v1, v2):
+    v1_u = normalize_vector3(v1)
+    v2_u = normalize_vector3(v2)
+    return numpy.arccos(numpy.clip(numpy.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 # Inicializando tela
 
@@ -254,8 +274,8 @@ while running:
 
     # Desenha Objeto
     z = back_face_culling(Z_in_world_coordinates, [0, 0, -100, 1])
-    pinta_faces(z, Color("Orange"))
-    desenha_faces(z)
+    pinta_faces(z, Color("Orange"), [200, 200, 100], 1)
+    #desenha_faces(z)
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
     #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
