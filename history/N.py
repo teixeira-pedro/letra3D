@@ -158,6 +158,16 @@ def desenha_face(face):
         pointB = pointSRUtoScreen(face[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
 
+def pinta_faces(object_3D, color):
+    for face in object_3D:
+        pinta_face(face, color)
+
+def pinta_face(face, color):
+    poligono2D = copy.deepcopy(face)
+    for i in range(len(poligono2D)):
+        poligono2D[i] = pointSRUtoScreen(poligono2D[i])
+    pygame.draw.polygon(screen, color, poligono2D)
+
 
 # Inicializando tela
 
@@ -198,7 +208,9 @@ while running:
 
 
     # Desenha Objeto
-    desenha_faces(back_face_culling(Z_in_world_coordinates, [0, 0, -100, 1]))
+    z = back_face_culling(Z_in_world_coordinates, [0, 0, -100, 1])
+    pinta_faces(z, Color("Orange"))
+    desenha_faces(z)
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
     #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
