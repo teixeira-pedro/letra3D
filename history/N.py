@@ -204,7 +204,6 @@ def faces_ordenadas_por_menor_dist(O,obser): #pega o objeto, o ponto de observac
     #cria uma lista contendo [o ponto mais proximo da face, a proporia face] de cada face
     #ordena a lista em relacao a distancia entre o ponto mais proximo da face e a observa
     #limpa a lista, deixando so  as faces ordenadas e retorna
-    
     resp=[]
     k=[]
     for F in O:
