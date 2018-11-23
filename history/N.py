@@ -79,10 +79,11 @@ def oblique_parallel_projection_matrix (degrees, l = 1):
 
 def back_face_culling (object3D, observer_point):
     new_object = []
-    for i in object3D:
+    for i in range(len(object3D)):
         face_normal = normal_vector(object3D[i])
-        if (numpy.dot(map(operator.sub, object3D[i], observer_point), face_normal) < 0):
-            new_object += object3D[i]
+        a = list(map(operator.sub, object3D[i][0], observer_point))[:3]
+        if (numpy.dot(a, face_normal) < 0):
+            new_object += [object3D[i]]
     return new_object
 
 def rotation_matrix_around_y (degrees):
@@ -111,9 +112,9 @@ def reversed_normal (face):
 
 def normal_vector (face):
     nface = copy.deepcopy(face)
-    a = list(map(operator.sub, nface[0], nface[1])) # v1 - v2
+    a = list(map(operator.sub, nface[1], nface[0])) # v1 - v2
     a = a[0:3]
-    b = list(map(operator.sub, nface[0], nface[2])) # v1 - v3
+    b = list(map(operator.sub, nface[2], nface[0])) # v1 - v3
     b = b[0:3]
     return list(numpy.cross(a, b))
 
@@ -122,7 +123,7 @@ def sweep_3D (object_2D, depth):
     object_3D += [copia_face_principal_para_plano_z(object_2D, depth)] # será revertido no final
     pts = len(object_2D)
     for v in range(pts):
-        new_face = copy.deepcopy([object_3D[0][v], object_3D[0][(v + 1) % pts], object_3D[1][(v + 1) % pts], object_3D[1][v]])
+        new_face = copy.deepcopy([object_3D[1][v], object_3D[1][(v + 1) % pts], object_3D[0][(v + 1) % pts], object_3D[0][v]])
         object_3D += [new_face]
     object_3D[1] = reversed_normal(object_3D[1])
     return object_3D
@@ -197,7 +198,7 @@ while running:
 
 
     # Desenha Objeto
-    desenha_faces(Z_in_world_coordinates)
+    desenha_faces(back_face_culling(Z_in_world_coordinates, [0, 0, -100, 1]))
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
     #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
