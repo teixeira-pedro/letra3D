@@ -85,11 +85,20 @@ def oblique_parallel_projection_matrix (degrees, l = 1):
     degrees = numpy.deg2rad(degrees)
     return [[1, 0, l * numpy.cos(degrees), 0], [0, 1, l * numpy.sin(degrees), 0], [0, 0, 0, 0], [0, 0, 0, 1]]
 
-def back_face_culling (object3D, observer_point):
+def back_face_culling (object3D, projection, observer_point):
+    temp_proj = copy.deepcopy(projection)
+    for i in range(len(temp_proj)):
+        if (temp_proj[i][i] == 0):
+            temp_proj[i][i] == 1
+    
+    temp_obj = []
+    for face in object3D:
+        temp_obj += [list(numpy.matmul(face, numpy.transpose(temp_proj)))]
+
     new_object = []
-    for i in range(len(object3D)):
-        face_normal = normal_vector(object3D[i])
-        a = list(map(operator.sub, object3D[i][0], observer_point))[:3]
+    for i in range(len(temp_obj)):
+        face_normal = normal_vector(temp_obj[i])
+        a = list(map(operator.sub, temp_obj[i][0], observer_point))[:3]
         if (numpy.dot(a, face_normal) < 0):
             new_object += [object3D[i]]
     return new_object
@@ -300,10 +309,10 @@ while running:
     if (MODO == 1):
         desenha_faces(z, oblique_parallel_projection_matrix(120))
     elif (MODO == 2):
-        z = back_face_culling(Z_in_world_coordinates, observador)
+        z = back_face_culling(Z_in_world_coordinates, oblique_parallel_projection_matrix(120), observador)
         pinta_com_bordas(z, oblique_parallel_projection_matrix(120), observador, Color("Purple"), Color("Black"))
     elif (MODO == 3):
-        z = back_face_culling(Z_in_world_coordinates, observador)
+        z = back_face_culling(Z_in_world_coordinates, oblique_parallel_projection_matrix(120), observador)
         pinta_faces(z, oblique_parallel_projection_matrix(120), observador, Color("Orange"), [200, 200, -100], 1)
 
     # Desenha Borda
