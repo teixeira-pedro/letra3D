@@ -7,6 +7,12 @@ import operator
 
 
 # Configuracoes
+
+# ESCOLHA O MODO PARA EXIBIR A LETRA
+MODO = 3 # SELECIONAR 1 PARA WIREFRAME, 2 PARA NAO TRANSPARENTE, 3 PARA ILUMINADO
+
+
+
 color = (123, 49, 125)
 width = 6 # espessura da linha desenhada
 scale = 4
@@ -153,43 +159,45 @@ def pointSRUtoScreen (point):
     new[1] = SCREEN_HEIGHT - new[1] * max(SCREEN_WIDTH, SCREEN_HEIGHT) / 100.0
     return [new[0], new[1]]
 
-def desenha_faces(O):
+def desenha_faces(O, projection):
     for face in O:
-        desenha_face(face)
+        desenha_face(face, projection)
 
-def desenha_face(face):
-    for i in range(-1, len(face)-1):
-        pointA = pointSRUtoScreen(face[i])
-        pointB = pointSRUtoScreen(face[i-1])
+def desenha_face(face, projection):
+    polygon2D = list(numpy.matmul(face, numpy.transpose(projection)))
+    for i in range(-1, len(polygon2D)-1):
+        pointA = pointSRUtoScreen(polygon2D[i])
+        pointB = pointSRUtoScreen(polygon2D[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
 
-def pinta_faces(object3D, observer_point, color, luz_ponto=None, luz_intensidade=0):
-    ordenado = faces_ordenadas_por_menor_dist(object3D, observer_point)
+def pinta_faces(object3D, projection, observer_point, color, luz_ponto=None, luz_intensidade=0):
+    ordenado = faces_ordenadas_por_menor_dist(object3D, projection, observer_point)
     ordenado.reverse()
     for face in ordenado:
-        pinta_face(face, color, luz_ponto, luz_intensidade)
+        pinta_face(face, projection, color, luz_ponto, luz_intensidade)
 
-def pinta_face(face, color, luz_ponto=None, luz_intensidade=0, width=0): # Luz pontual
-    if (luz_ponto != None and luz_intensidade > 0):
-        incidence_vector = list(map(operator.sub, face[0], luz_ponto))
-        radiance = luz_intensidade * numpy.cos(angle_between(normal_vector(face), incidence_vector))
+def pinta_face(face, projection, color, luz_direcional=None, luz_intensidade=0, width=0): # Luz pontual
+    if (luz_direcional != None and luz_intensidade > 0):
+        luz_direcional = list(-1 * numpy.array(luz_direcional))
+        print(normal_vector(face))
+        #incidence_vector = list(map(operator.sub, face[0], luz_ponto))
+        radiance = luz_intensidade * numpy.clip(numpy.dot(normalize_vector3(normal_vector(face)), normalize_vector3(luz_direcional)), -1, 1)#numpy.cos(angle_between(normal_vector(face), luz_direcional))#incidence_vector))
         #color = Color(round(color.r * radiance), round(color.g * radiance), round(color.b * radiance), color.a)
         print(radiance)
-        if (radiance < 0.1):
-            radiance = 0.1
-        print(radiance)
-        color = Color(round(color.r * radiance), round(color.g * radiance), round(color.b * radiance), color.a)
-    poligono2D = copy.deepcopy(face)
+        if (radiance < 0.2):
+            radiance = 0.2
+        color = Color(int(color.r * radiance), int(color.g * radiance), int(color.b * radiance), color.a)
+    poligono2D = list(numpy.matmul(face, numpy.transpose(projection)))
     for i in range(len(poligono2D)):
         poligono2D[i] = pointSRUtoScreen(poligono2D[i])
     pygame.draw.polygon(screen, color, poligono2D, width)
 
-def pinta_com_bordas(object3D, observer_point, line_color, face_color):
-    ordenado = faces_ordenadas_por_menor_dist(object3D, observer_point)
+def pinta_com_bordas(object3D, projection, observer_point, line_color, face_color):
+    ordenado = faces_ordenadas_por_menor_dist(object3D, projection, observer_point)
     ordenado.reverse()
     for face in ordenado:
-        pinta_face(face, face_color)
-        pinta_face(face, line_color, width = width)
+        pinta_face(face, projection, face_color)
+        pinta_face(face, projection, line_color, width = width)
 
 def dist_vet(v): #retorna tamanhao do vetor
     d=0
@@ -213,20 +221,32 @@ def dist_face(F,obser): #retorna o ponto mais proximo da face , juntamente com  
     return [i,F]
 
 def tama(m): #funcao auxiliar pra ordenacao
-    return m[0]
+    return m[0][0]
 
-def faces_ordenadas_por_menor_dist(O,obser): #pega o objeto, o ponto de observacao
+def faces_ordenadas_por_menor_dist(O, projection, obser): #pega o objeto, o ponto de observacao
     #cria uma lista contendo [o ponto mais proximo da face, a proporia face] de cada face
     #ordena a lista em relacao a distancia entre o ponto mais proximo da face e a observa
     #limpa a lista, deixando so  as faces ordenadas e retorna
     resp=[]
     k=[]
-    for F in O:
-        k.append(dist_face(F,obser))
+
+    temp_proj = copy.deepcopy(projection)
+    for i in range(len(temp_proj)):
+        if (temp_proj[i][i] == 0):
+            temp_proj[i][i] == 1
+    
+    temp_obj = []
+    for face in O:
+        temp_obj += [list(numpy.matmul(face, numpy.transpose(temp_proj)))]
+
+    for i in range(len(temp_obj)):
+        k.append([dist_face(temp_obj[i],obser), i])
     k.sort(reverse=False,key=tama) # ordena em relacao a distancia de cada face em relacao ao O
-    for u in k: #retira as distancias
-        resp.append(u[1])
-    return resp
+    
+    for i in range(len(temp_obj)):
+        resp += [O[k[i][1]]]
+    
+    return copy.deepcopy(resp)
 
 def normalize_vector2(vector2):
     v = copy.deepcopy(vector2)
@@ -264,37 +284,27 @@ while running:
 
     transform_matrix = numpy.matmul(scaling_matrix(scale), transform_matrix)
     transform_matrix = numpy.matmul(translation_matrix(position[0], position[1], position[2]), transform_matrix)
-    transform_matrix = numpy.matmul(oblique_parallel_projection_matrix(120), transform_matrix)
 
     Z_in_world_coordinates = []
     
     for face in sweep_3D(N, m):
         Z_in_world_coordinates += [numpy.matmul(face, numpy.transpose(transform_matrix)).tolist()]
 
-    
-
-    #copy.deepcopy(N)
-    #for i in range(-1, len(N)-1):
-    #    Z_in_world_coordinates[i][0] += position[0]
-    #    Z_in_world_coordinates[i][1] += position[1]
-    #    Z_in_world_coordinates[i][2] += position[2]
-
-    #print(Z_in_world_coordinates)
 
     observador = [0, 0, 100, 1]
 
     # Desenha Objeto
-    z = back_face_culling(Z_in_world_coordinates, observador)
-    #pinta_faces(z, Color("Orange"), [200, 200, 100], 1)
-    #desenha_faces(z)
-    #desenha_faces(Z_in_world_coordinates)
-    #pinta_com_bordas(z, observador, Color("Purple"), Color("Black"))
-    pinta_faces(z, observador, Color("Orange"), [200, 200, 100], 1)
 
-    #for i in range(-1, len(N)-1):
-    #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
-    #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
-    #    draw2DLine(screen, pointA, pointB, color, width)
+    z = Z_in_world_coordinates
+
+    if (MODO == 1):
+        desenha_faces(z, oblique_parallel_projection_matrix(120))
+    elif (MODO == 2):
+        z = back_face_culling(Z_in_world_coordinates, observador)
+        pinta_com_bordas(z, oblique_parallel_projection_matrix(120), observador, Color("Purple"), Color("Black"))
+    elif (MODO == 3):
+        z = back_face_culling(Z_in_world_coordinates, observador)
+        pinta_faces(z, oblique_parallel_projection_matrix(120), observador, Color("Orange"), [200, 200, -100], 1)
 
     # Desenha Borda
     draw2DLine(screen, [0, 0], [0, SCREEN_HEIGHT], Color("white"), 5)
