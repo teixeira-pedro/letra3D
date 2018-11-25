@@ -164,7 +164,9 @@ def desenha_face(face):
         draw2DLine(screen, pointA, pointB, color, width)
 
 def pinta_faces(object3D, observer_point, color, luz_ponto=None, luz_intensidade=0):
-    for face in faces_ordenadas_por_menor_dist(object3D, observer_point):
+    ordenado = faces_ordenadas_por_menor_dist(object3D, observer_point)
+    ordenado.reverse()
+    for face in ordenado:
         pinta_face(face, color, luz_ponto, luz_intensidade)
 
 def pinta_face(face, color, luz_ponto=None, luz_intensidade=0, width=0): # Luz pontual
@@ -183,7 +185,9 @@ def pinta_face(face, color, luz_ponto=None, luz_intensidade=0, width=0): # Luz p
     pygame.draw.polygon(screen, color, poligono2D, width)
 
 def pinta_com_bordas(object3D, observer_point, line_color, face_color):
-    for face in faces_ordenadas_por_menor_dist(object3D, observer_point):
+    ordenado = faces_ordenadas_por_menor_dist(object3D, observer_point)
+    ordenado.reverse()
+    for face in ordenado:
         pinta_face(face, face_color)
         pinta_face(face, line_color, width = width)
 
@@ -204,8 +208,8 @@ def VET(A,B): #retorna vetor AB
 def dist_face(F,obser): #retorna o ponto mais proximo da face , juntamente com  a face
     i=float("inf")
     for P in F:
-        if dist_vet(VET(P,obser))<i:
-            i=dist_vet(VET(P,obser))
+        if dist_vet(VET(P[:3],obser[:3]))<i:
+            i=dist_vet(VET(P[:3],obser[:3]))
     return [i,F]
 
 def tama(m): #funcao auxiliar pra ordenacao
@@ -284,8 +288,8 @@ while running:
     #pinta_faces(z, Color("Orange"), [200, 200, 100], 1)
     #desenha_faces(z)
     #desenha_faces(Z_in_world_coordinates)
-    pinta_com_bordas(z, observador, Color("Purple"), Color("Black"))
-    #pinta_faces(z, observador, Color("Orange"), [200, 200, 100], 1)
+    #pinta_com_bordas(z, observador, Color("Purple"), Color("Black"))
+    pinta_faces(z, observador, Color("Orange"), [200, 200, 100], 1)
 
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
