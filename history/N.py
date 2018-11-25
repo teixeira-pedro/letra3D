@@ -51,7 +51,9 @@ N += [[+1.5, -0.5, 0.0, 1.0]]
 N += [[+1.5, +1.5, 0.0, 1.0]]
 N += [[+2.5, +2.5, 0.0, 1.0]]
 
-initial_position = [50, 0, 0]
+
+
+initial_position = [50, 50, 0]
 
 # transform
 position = initial_position.copy()
@@ -59,8 +61,8 @@ rotation = [0, 0, 90]
 
 # etc
 m = sqrt(2) # Menor aresta (calculada manualmente), usada como espessura
-velocity = [0.5, 2.0, 0]
-rotation_velocity = [0, 5, 1]
+velocity = [0.00005, 0.00020, 0]
+rotation_velocity = [0, 00.5, 00.1]
 
 
 # Definindo funcoes
@@ -74,7 +76,7 @@ def translation_matrix (x, y, z):
     return [[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]]
 
 def oblique_parallel_projection_matrix (degrees, l = 1):
-    angle = numpy.deg2rad(degrees)
+    degrees = numpy.deg2rad(degrees)
     return [[1, 0, l * numpy.cos(degrees), 0], [0, 1, l * numpy.sin(degrees), 0], [0, 0, 0, 0], [0, 0, 0, 1]]
 
 def back_face_culling (object3D, observer_point):
@@ -110,11 +112,13 @@ def reversed_normal (face):
     inverted_face.reverse()
     return inverted_face
 
+N = reversed_normal(N)
+
 def normal_vector (face):
     nface = copy.deepcopy(face)
-    a = list(map(operator.sub, nface[1], nface[0])) # v1 - v2
+    a = list(map(operator.sub, nface[0], nface[1])) # v1 - v2
     a = a[0:3]
-    b = list(map(operator.sub, nface[2], nface[0])) # v1 - v3
+    b = list(map(operator.sub, nface[0], nface[2])) # v1 - v3
     b = b[0:3]
     return list(numpy.cross(a, b))
 
@@ -124,6 +128,7 @@ def sweep_3D (object_2D, depth):
     pts = len(object_2D)
     for v in range(pts):
         new_face = copy.deepcopy([object_3D[1][v], object_3D[1][(v + 1) % pts], object_3D[0][(v + 1) % pts], object_3D[0][v]])
+        #new_face = reversed_normal(new_face)
         object_3D += [new_face]
     object_3D[1] = reversed_normal(object_3D[1])
     return object_3D
@@ -158,21 +163,29 @@ def desenha_face(face):
         pointB = pointSRUtoScreen(face[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
 
-def pinta_faces(object_3D, color, luz_ponto=None, luz_intensidade=0):
-    for face in object_3D:
+def pinta_faces(object3D, observer_point, color, luz_ponto=None, luz_intensidade=0):
+    for face in faces_ordenadas_por_menor_dist(object3D, observer_point):
         pinta_face(face, color, luz_ponto, luz_intensidade)
 
-def pinta_face(face, color, luz_ponto=None, luz_intensidade=0): # Luz pontual
+def pinta_face(face, color, luz_ponto=None, luz_intensidade=0, width=0): # Luz pontual
     if (luz_ponto != None and luz_intensidade > 0):
         incidence_vector = list(map(operator.sub, face[0], luz_ponto))
         radiance = luz_intensidade * numpy.cos(angle_between(normal_vector(face), incidence_vector))
         #color = Color(round(color.r * radiance), round(color.g * radiance), round(color.b * radiance), color.a)
         print(radiance)
-        color = color * radiance
+        if (radiance < 0.1):
+            radiance = 0.1
+        print(radiance)
+        color = Color(round(color.r * radiance), round(color.g * radiance), round(color.b * radiance), color.a)
     poligono2D = copy.deepcopy(face)
     for i in range(len(poligono2D)):
         poligono2D[i] = pointSRUtoScreen(poligono2D[i])
-    pygame.draw.polygon(screen, color, poligono2D)
+    pygame.draw.polygon(screen, color, poligono2D, width)
+
+def pinta_com_bordas(object3D, observer_point, line_color, face_color):
+    for face in faces_ordenadas_por_menor_dist(object3D, observer_point):
+        pinta_face(face, face_color)
+        pinta_face(face, line_color, width = width)
 
 def dist_vet(v): #retorna tamanhao do vetor
     d=0
@@ -194,13 +207,6 @@ def dist_face(F,obser): #retorna o ponto mais proximo da face , juntamente com  
         if dist_vet(VET(P,obser))<i:
             i=dist_vet(VET(P,obser))
     return [i,F]
-
-#def test_faces_ordenadas(O,obser): #
-#    k=[]
- #   for F in O:
-#        k.append(dist_face(F,obser))
-   # k.sort(reverse=False,key=tama) # ordena em relacao a distancia de cada face em relacao ao O
-  #  return k
 
 def tama(m): #funcao auxiliar pra ordenacao
     return m[0]
@@ -271,11 +277,16 @@ while running:
 
     #print(Z_in_world_coordinates)
 
+    observador = [0, 0, 100, 1]
 
     # Desenha Objeto
-    z = back_face_culling(Z_in_world_coordinates, [0, 0, -100, 1])
-    pinta_faces(z, Color("Orange"), [200, 200, 100], 1)
+    z = back_face_culling(Z_in_world_coordinates, observador)
+    #pinta_faces(z, Color("Orange"), [200, 200, 100], 1)
     #desenha_faces(z)
+    #desenha_faces(Z_in_world_coordinates)
+    pinta_com_bordas(z, observador, Color("Purple"), Color("Black"))
+    #pinta_faces(z, observador, Color("Orange"), [200, 200, 100], 1)
+
     #for i in range(-1, len(N)-1):
     #    pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
     #    pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
