@@ -71,7 +71,8 @@ def desenha_semicirculo_param(P_i,h_x,h_y,tela,cor,width):
 
 
 def desenha_pygame_ponto(P,tela,cor,width):
-    pygame.draw.line(tela,P,P,cor,width)
+    draw2DLine(tela, P,P, cor, width)
+    #pygame.draw.line(tela,P,P,cor,width)
 
 
 def scaling_matrix (scale):
@@ -137,6 +138,10 @@ while running:
         pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
         pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
         draw2DLine(screen, pointA, pointB, color, width)
+
+    ########## tentando aplicar o semicirculo na posição pointA
+    #circulo com excentricidade 0.5 em hy e hx
+    desenha_semicirculo_param(pointA,0.5,0.5,screen,color,5)
 
     # Desenha Borda
     draw2DLine(screen, [0, 0], [0, SCREEN_HEIGHT], Color("white"), 5)
