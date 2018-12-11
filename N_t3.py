@@ -64,7 +64,7 @@ def desenha_semicirculo_param(P_i,h_x,h_y,tela,cor,width):
     theta=0.
     t=radians(theta)
     while t<= radians(360):
-        desenha_pygame_ponto([P_i[0]-(h_x*abs(cos(t))),P_i[1]+(h_y*sin(t))],tela,cor,width)
+        desenha_pygame_ponto(pointSRUtoScreen([P_i[0]-(h_x*abs(cos(t))),P_i[1]+(h_y*sin(t))]),tela,cor,width)
         #desenha_pygame_ponto([h_x*cos(t)+P_i[0],-h_y*abs(sin(t))+P_i[1]],tela,cor,width)
         theta=theta+0.01
         t=radians(theta)
