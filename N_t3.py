@@ -71,7 +71,8 @@ def desenha_semicirculo_param(P_i,h_x,h_y,tela,cor,width):
 
 
 def desenha_pygame_ponto(P,tela,cor,width):
-    draw2DLine(tela, P,P, cor, width)
+    pygame.draw.circle(tela,cor,P,0,0)
+    #draw2DLine(tela, P,P, cor, width)
     #pygame.draw.line(tela,P,P,cor,width)
 
 
