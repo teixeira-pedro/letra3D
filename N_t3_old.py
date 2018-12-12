@@ -3,7 +3,6 @@ from pygame.locals import *
 import numpy
 from math import *
 import copy
-from pygame import gfxdraw
 
 # Configurações
 color = (123, 49, 125)
@@ -65,17 +64,14 @@ def desenha_semicirculo_param(P_i,h_x,h_y,tela,cor,width):
     theta=0.
     t=radians(theta)
     while t<= radians(360):
-        desenha_pygame_ponto(pointSRUtoScreen([P_i[0]-(h_x*abs(cos(t))),P_i[1]+(h_y*sin(t))]),tela,cor,width)
+        desenha_pygame_ponto([P_i[0]-(h_x*abs(cos(t))),P_i[1]+(h_y*sin(t))],tela,cor,width)
         #desenha_pygame_ponto([h_x*cos(t)+P_i[0],-h_y*abs(sin(t))+P_i[1]],tela,cor,width)
         theta=theta+0.01
         t=radians(theta)
 
 
 def desenha_pygame_ponto(P,tela,cor,width):
-    for u in range(width):
-        gfxdraw.pixel(tela,int(P[0])+u,int(P[1])+u,(cor[0],cor[1],cor[2]))
-    #pygame.draw.circle(tela,cor,[int(P[0]), int(P[1])],int(width/2),0)
-    #draw2DLine(tela, P,P, cor, width)
+    draw2DLine(tela, P,P, cor, width)
     #pygame.draw.line(tela,P,P,cor,width)
 
 
@@ -142,12 +138,10 @@ while running:
         pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
         pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
         draw2DLine(screen, pointA, pointB, color, width)
-    desenha_semicirculo_param([30,30],4,2,screen,color,5)
 
     ########## tentando aplicar o semicirculo na posição pointA
     #circulo com excentricidade 0.5 em hy e hx
-#    desenha_semicirculo_param(pointA,0.5,0.5,screen,color,5)
-    #gfxdraw.pixel(screen,100,100,(color[0],color[1],color[2]))
+    desenha_semicirculo_param(pointA,0.5,0.5,screen,color,5)
 
     # Desenha Borda
     draw2DLine(screen, [0, 0], [0, SCREEN_HEIGHT], Color("white"), 5)
