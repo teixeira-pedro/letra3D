@@ -36,17 +36,38 @@ SCREEN_HEIGHT = 640
 # Escolha das coordenadas da imagem
 
 N = []
-N += [[+2.5, -1.5, 0.0, 1.0]]
-N += [[+1.5, -2.5, 0.0, 1.0]]
-N += [[-1.5, +0.5, 0.0, 1.0]]
-N += [[-1.5, -0.5, 0.0, 1.0]]
-N += [[-2.5, -2.5, 0.0, 1.0]]
-N += [[-2.5, +1.5, 0.0, 1.0]]
-N += [[-1.5, +2.5, 0.0, 1.0]]
-N += [[+1.5, -0.5, 0.0, 1.0]]
-N += [[+1.5, +1.5, 0.0, 1.0]]
-N += [[+2.5, +2.5, 0.0, 1.0]]
+#    [[x   ,  y  ,  z ,  1 ]
+#N += [[+2.5, -1.5, 0.0, 1.0]]#A 0  etha
+#N += [[+1.5, -2.5, 0.0, 1.0]]#B 1  lambda
+#N += [[-1.5, +0.5, 0.0, 1.0]]#C 2 mi
+#N += [[-1.5, -2.5, 0.0, 1.0]]#D 3 <--- pi
+#N += [[-2.5, -2.5, 0.0, 1.0]]#E 4 <--- alpha
+#N += [[-2.5, +1.5, 0.0, 1.0]]#F 5   beta
+#N += [[-1.5, +2.5, 0.0, 1.0]]#G 6 gamma
+#N += [[+1.5, -0.5, 0.0, 1.0]]#H 7 delta
+#N += [[+1.5, +1.5, 0.0, 1.0]]#I 8 epsilon
+#N += [[+2.5, +2.5, 0.0, 1.0]]#J 9 phi
+N += [[-1.5, +2.5, 0.0, 1.0]]#G 0 alpha
+N += [[+1.5, -0.5, 0.0, 1.0]]#H 1 beta
+N += [[+1.5, +1.5, 0.0, 1.0]]#I 2 gamma
+N += [[+2.5, +2.5, 0.0, 1.0]]#J 3 delta
+N += [[+2.5, -1.5, 0.0, 1.0]]#A 4 epsilon
+N += [[+1.5, -2.5, 0.0, 1.0]]#B 5 phi
+N += [[-1.5, +0.5, 0.0, 1.0]]#C 6 etha
+N += [[-1.5, -2.5, 0.0, 1.0]]#D 7 <--- lambda
+N += [[-2.5, -2.5, 0.0, 1.0]]#E 8 <--- mi
+N += [[-2.5, +1.5, 0.0, 1.0]]#F 9 pi
 
+def ponto_curva(O):
+    mi=O[8]
+    lambd=O[7]
+    return [(mi[0]+lambd[0])/2 ,(mi[1]+lambd[1])/2 ,(mi[2]+lambd[2])/2 , 1.0]
+
+def point_2_2D(P):
+    return [P[0],P[1]]
+
+
+#initial_position = [50, 50, 0]
 initial_position = [50, 0, 0]
 
 # transform
@@ -138,11 +159,11 @@ while running:
 
 
     # Desenha Objeto
-    for i in range(-1, len(N)-1):
+    for i in range(-1, len(N)-2):
         pointA = pointSRUtoScreen(Z_in_world_coordinates[i][:2])
         pointB = pointSRUtoScreen(Z_in_world_coordinates[i-1][:2])
         draw2DLine(screen, pointA, pointB, color, width)
-    desenha_semicirculo_param([30,30],4,2,screen,color,5)
+    desenha_semicirculo_param(point_2_2D(ponto_curva(Z_in_world_coordinates)),2,2,screen,color,5)
 
     ########## tentando aplicar o semicirculo na posição pointA
     #circulo com excentricidade 0.5 em hy e hx
