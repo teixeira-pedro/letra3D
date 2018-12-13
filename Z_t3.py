@@ -103,6 +103,16 @@ def desenha_semicirculo_param(P_i,h_x,h_y,tela,cor,width):
         t=radians(theta)
 
 
+def semicirculo_param_3D(P_i,h_x,h_y,t,k):
+    return [P_i[0] - (h_x * abs(cos(t))), P_i[1] + (h_y * sin(t)),k,1]
+
+def gera_superficie_semicirculo(hx,hy,k,t):
+    sup=[]
+    for i in range(1,10):
+        sup.append([-hx*abs(cos(i*pi/5)),hy*sin(i*pi/5),k,1])
+    return sup
+
+
 def desenha_pygame_ponto(P,tela,cor,width):
     for u in range(width):
         gfxdraw.pixel(tela,int(P[0])+u,int(P[1])+u,(cor[0],cor[1],cor[2]))
@@ -210,9 +220,11 @@ def desenha_faces(O, projection):
     for face in O:
         desenha_face(face, projection)
 
+
+
 def desenha_face(face, projection):
     polygon2D = list(numpy.matmul(face, numpy.transpose(projection)))
-    for i in range(-1, len(polygon2D)-2):
+    for i in range(-1, len(polygon2D)-1):
         pointA = pointSRUtoScreen(polygon2D[i])
         pointB = pointSRUtoScreen(polygon2D[i-1])
         draw2DLine(screen, pointA, pointB, color, width)
@@ -337,6 +349,7 @@ while running:
     Z_in_world_coordinates = []
     
     for face in sweep_3D(N, m):
+        print(face)
         Z_in_world_coordinates += [numpy.matmul(face, numpy.transpose(transform_matrix)).tolist()]
 
 
